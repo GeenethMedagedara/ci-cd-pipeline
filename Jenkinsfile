@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_IMAGE = "geemlops/test_flask:latest"
+        DOCKER_IMAGE = "geemlops/test_flask/my-app:latest"
     }
 
     stages {
