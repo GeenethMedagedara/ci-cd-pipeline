@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_IMAGE = "my-dockerhub-username/my-app:latest"
+        DOCKER_IMAGE = "geemlops/test_flask:latest"
     }
 
     stages {
