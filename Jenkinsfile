@@ -6,12 +6,6 @@ pipeline {
     }
 
     stages {
-        stage('Clone Repository') {
-            steps {
-                git 'https://github.com/your-username/ci-cd-pipeline.git'
-            }
-        }
-
         stage('Debugging') {
             steps {
                 echo "Jenkins pipeline is triggered! 🎉"
