@@ -1,19 +1,19 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: my-app
+  name: flask-app
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: my-app
+      app: flask-app
   template:
     metadata:
       labels:
-        app: my-app
+        app: flask-app
     spec:
       containers:
-      - name: my-app
-        image: my-dockerhub-username/my-app:latest
+      - name: flask-app
+        image: myazurecontainerregistry.azurecr.io/my-app:latest
         ports:
         - containerPort: 5000

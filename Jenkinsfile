@@ -2,7 +2,9 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_IMAGE = "geemlops/test_flask/my-app:latest"
+        AZURE_REGISTRY = "myazurecontainerregistry.azurecr.io"
+        DOCKER_IMAGE = "${AZURE_REGISTRY}/my-app:latest"
+        KUBE_CONFIG_PATH = "/var/jenkins_home/.kube/config"
     }
 
     stages {
@@ -24,20 +26,21 @@ pipeline {
             }
         }
 
-        stage('Push to Docker Hub') {
+        stage('Push to Azure Container Registry') {
             steps {
-                withDockerRegistry([credentialsId: 'docker-hub', url: 'https://index.docker.io/v1/']) {
+                withCredentials([usernamePassword(credentialsId: 'azure-acr', usernameVariable: 'ACR_USER', passwordVariable: 'ACR_PASSWORD')]) {
+                    sh "docker login ${AZURE_REGISTRY} -u $ACR_USER -p $ACR_PASSWORD"
                     sh "docker push ${DOCKER_IMAGE}"
                 }
             }
         }
 
-        stage('Deploy to Kubernetes') {
+        stage('Deploy to Azure Kubernetes Service') {
             steps {
-                // Ensure kubectl is configured before running these commands
-                sh "kubectl config set-context --current --namespace=default"
-                sh "kubectl apply -f k8s/deployment.yaml"
-                sh "kubectl apply -f k8s/service.yaml"
+                withKubeConfig([credentialsId: 'azure-kubeconfig', serverUrl: '']) {
+                    sh "kubectl apply -f k8s/deployment.yaml"
+                    sh "kubectl apply -f k8s/service.yaml"
+                }
             }
         }
     }

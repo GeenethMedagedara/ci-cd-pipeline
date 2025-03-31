@@ -1,27 +1,33 @@
-provider "aws" {
-  region = "us-east-1"
+provider "azurerm" {
+  features {}
 }
 
-resource "aws_ecs_cluster" "main" {
-  name = "my-cluster"
+resource "azurerm_resource_group" "rg" {
+  name     = "my-azure-rg"
+  location = "East US"
 }
 
-resource "aws_ecs_task_definition" "app" {
-  family                   = "my-app"
-  container_definitions    = <<DEFINITION
-  [
-    {
-      "name": "my-app",
-      "image": "my-dockerhub-username/my-app:latest",
-      "memory": 512,
-      "cpu": 256,
-      "portMappings": [
-        {
-          "containerPort": 5000,
-          "hostPort": 5000
-        }
-      ]
-    }
-  ]
-  DEFINITION
+resource "azurerm_container_registry" "acr" {
+  name                = "myazurecontainerregistry"
+  resource_group_name = azurerm_resource_group.rg.name
+  location            = azurerm_resource_group.rg.location
+  sku                 = "Basic"
+  admin_enabled       = true
+}
+
+resource "azurerm_kubernetes_cluster" "aks" {
+  name                = "myakscluster"
+  location            = azurerm_resource_group.rg.location
+  resource_group_name = azurerm_resource_group.rg.name
+  dns_prefix          = "myaksdns"
+
+  default_node_pool {
+    name       = "default"
+    node_count = 2
+    vm_size    = "Standard_DS2_v2"
+  }
+
+  identity {
+    type = "SystemAssigned"
+  }
 }
