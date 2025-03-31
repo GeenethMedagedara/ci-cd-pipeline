@@ -14,28 +14,30 @@ pipeline {
 
         stage('Build') {
             steps {
-                sh 'docker build -t $DOCKER_IMAGE .'
+                sh "docker build -t ${DOCKER_IMAGE} ."
             }
         }
 
         stage('Test') {
             steps {
-                sh 'pytest tests/'
+                sh "pytest tests/"
             }
         }
 
         stage('Push to Docker Hub') {
             steps {
-                withDockerRegistry([credentialsId: 'docker-hub', url: '']) {
-                    sh 'docker push $DOCKER_IMAGE'
+                withDockerRegistry([credentialsId: 'docker-hub', url: 'https://index.docker.io/v1/']) {
+                    sh "docker push ${DOCKER_IMAGE}"
                 }
             }
         }
 
         stage('Deploy to Kubernetes') {
             steps {
-                sh 'kubectl apply -f k8s/deployment.yaml'
-                sh 'kubectl apply -f k8s/service.yaml'
+                // Ensure kubectl is configured before running these commands
+                sh "kubectl config set-context --current --namespace=default"
+                sh "kubectl apply -f k8s/deployment.yaml"
+                sh "kubectl apply -f k8s/service.yaml"
             }
         }
     }
